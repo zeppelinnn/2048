@@ -1,52 +1,29 @@
-function GameManager(size, InputManager, Actuator) {
+var Tile = require('./tile');
+var Grid = require('./grid');
+
+function GameManager(size) {
   this.size           = size; // Size of the grid
-  this.inputManager   = new InputManager;
-  this.actuator       = new Actuator;
-  this.socket         = io.connect();
 
   this.startTiles     = 2;
-
-  this.inputManager.on("move", this.move.bind(this));
-  this.inputManager.on("restart", this.restart.bind(this));
-  this.inputManager.on("sendMove", this.sendMove.bind(this));
 
   this.setup();
 }
 
-
-GameManager.prototype.setBoard = function (data) {
-  console.log(data);
-  this.grid = new Grid(this.size);
-  for (var i=0; i < data.grid.cells.length; i++) {
-    for (var j=0; j < data.grid.cells[0].length; j++) {
-      cell = data.grid.cells[i][j];
-      if (cell) {
-        tile = new Tile({x: cell.x, y: cell.y}, cell.value);
-        this.grid.insertTile(tile);
-      }
-    }
-  }
-
-  this.won = data.won;
-  this.over = data.over;
-  this.score = data.score;
-
-  this.actuate();
-}
-
 // Restart the game
 GameManager.prototype.restart = function () {
-  this.actuator.restart(); // Clear the game won/lost message
   this.setup();
 };
 
 // Set up the game
 GameManager.prototype.setup = function () {
-  this.grid        = new Grid(this.size);
-  this.score       = 0;
-  this.over        = false;
-  this.won         = false;
-  console.log("setting up");
+    this.grid        = new Grid(this.size);
+    this.score       = 0;
+    this.over        = false;
+    this.won         = false;
+
+    // Add the initial tiles
+    this.addStartTiles();
+
   // Update the actuator
   this.actuate();
 };
@@ -74,28 +51,27 @@ GameManager.prototype.getState = function () {
 
 // Sends the updated grid to the actuator
 GameManager.prototype.actuate = function () {
-  this.actuator.actuate(this.grid, {
+  this.state = {
+    grid: this.grid,
     score: this.score,
     over: this.over,
-    won: this.won,
-  });
-};
-
-// Represent the current game as an object
-GameManager.prototype.serialize = function () {
-  return {
-    grid:        this.grid.serialize(),
-    score:       this.score,
-    over:        this.over,
-    won:         this.won,
-    keepPlaying: this.keepPlaying
+    won: this.won
   };
 };
 
+// // Represent the current game as an object
+// GameManager.prototype.serialize = function () {
+//   return {
+//     grid:        this.grid.serialize(),
+//     score:       this.score,
+//     over:        this.over,
+//     won:         this.won,
+//     keepPlaying: this.keepPlaying
+//   };
+// };
+
 // Save all tile positions and remove merger info
 GameManager.prototype.prepareTiles = function () {
-  console.log("grid:");
-  console.log(this.grid);
   this.grid.eachCell(function (x, y, tile) {
     if (tile) {
       tile.mergedFrom = null;
@@ -110,10 +86,6 @@ GameManager.prototype.moveTile = function (tile, cell) {
   this.grid.cells[cell.x][cell.y] = tile;
   tile.updatePosition(cell);
 };
-
-GameManager.prototype.sendMove = function (direction) {
-  this.socket.emit("sendMove", {direction: direction});
-}
 
 // Move tiles on the grid in the specified direction
 GameManager.prototype.move = function (direction) {
@@ -259,3 +231,5 @@ GameManager.prototype.tileMatchesAvailable = function () {
 GameManager.prototype.positionsEqual = function (first, second) {
   return first.x === second.x && first.y === second.y;
 };
+
+module.exports = GameManager;

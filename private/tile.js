@@ -15,3 +15,5 @@ Tile.prototype.updatePosition = function (position) {
   this.x = position.x;
   this.y = position.y;
 };
+
+module.exports = Tile;

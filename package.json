@@ -1,0 +1,9 @@
+{
+  "name": "crowd2048",
+  "description": "2048 crowdsourced version",
+  "private": true,
+  "dependencies": {
+    "express": "3.x",
+    "socket.io": "~0.9.6"
+  }
+}

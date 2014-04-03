@@ -22,7 +22,6 @@ HTMLActuator.prototype.actuate = function (grid, metadata) {
     });
 
     self.updateScore(metadata.score);
-    self.updateBestScore(metadata.bestScore);
 
     if (metadata.terminated) {
       if (metadata.over) {
@@ -39,6 +38,11 @@ HTMLActuator.prototype.actuate = function (grid, metadata) {
 HTMLActuator.prototype.continueGame = function () {
   this.clearMessage();
 };
+
+HTMLActuator.prototype.restart = function () {
+  this.clearMessage();
+};
+
 
 HTMLActuator.prototype.clearContainer = function (container) {
   while (container.firstChild) {
@@ -118,10 +122,6 @@ HTMLActuator.prototype.updateScore = function (score) {
 
     this.scoreContainer.appendChild(addition);
   }
-};
-
-HTMLActuator.prototype.updateBestScore = function (bestScore) {
-  this.bestContainer.textContent = bestScore;
 };
 
 HTMLActuator.prototype.message = function (won) {
